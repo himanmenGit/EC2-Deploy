@@ -3,7 +3,7 @@ Description=EC2 Deploy uWSGI service
 after=syslog.target
 
 [Service]
-ExecStart=/home/ubuntu/.pyenv/versions/fc-ec2-deploy2/bin/uwsgi -i /srv/ec2-deploy/.config/uwsgi.ini
+ExecStart=/home/ubuntu/.pyenv/versions/fc-ec2-deploy2/bin/uwsgi -i /srv/ec2-deploy2/.config/uwsgi.ini
 
 Restart=always
 KillSignal=SIGQUIT

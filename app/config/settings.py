@@ -12,11 +12,23 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import json
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# ec2-deploy
 ROOT_DIR = os.path.dirname(BASE_DIR)
+
+# Static
+# ec2-deploy/.static
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(ROOT_DIR, '.static')
+
+# MEDIA (user -iploaded files)
+# ec2-deploy /.media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
+
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
 
 # ec2-deploy/.secrets
 SECRETS_DIR = os.path.join(ROOT_DIR, '.secrets')
@@ -43,7 +55,9 @@ SECRET_KEY = secrets_base['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '.amazonaws.com'
+]
 
 # Application definition
 
@@ -54,6 +68,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'photos.apps.PhotosConfig',
 ]
 
 MIDDLEWARE = [
@@ -129,5 +145,3 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
-
-STATIC_URL = '/static/'
