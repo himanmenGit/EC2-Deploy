@@ -56,6 +56,7 @@ SECRET_KEY = secrets_base['SECRET_KEY']
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'localhost',
     '.amazonaws.com'
 ]
 
@@ -68,6 +69,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_extensions',
 
     'photos.apps.PhotosConfig',
 ]
