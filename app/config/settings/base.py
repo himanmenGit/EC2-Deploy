@@ -39,8 +39,15 @@ SECRETS_LOCAL = os.path.join(SECRETS_DIR, 'local.json')
 SECRETS_DEV = os.path.join(SECRETS_DIR, 'dev.json')
 SECRETS_PRODUCTION = os.path.join(SECRETS_DIR, 'production.json')
 
-# 한줄로 요약
+# Django secret key
 secrets_base = json.loads(open(SECRETS_BASE, 'rt').read())
+
+# AWS
+AWS_ACCESS_KEY_ID = secrets_base['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = secrets_base['AWS_SECRET_ACCESS_KEY']
+AWS_STORAGE_BUCKET_NAME = secrets_base['AWS_STORAGE_BUCKET_NAME']
+AWS_S3_ENDPOINT_URL = 'https://s3.ap-northeast-2.amazonaws.com'
+AWS_DEFAULT_ACL = 'private'
 
 # secrets_base에서 key 값 가져옴
 SECRET_KEY = secrets_base['SECRET_KEY']
@@ -57,10 +64,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django_extensions',
+    'raven.contrib.django.raven_compat',
+    'storages',
 
     'photos.apps.PhotosConfig',
 
-    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -90,8 +98,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'config.wsgi.application'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
