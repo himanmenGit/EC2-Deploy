@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 import json
 import os
+import raven
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 
 # Static
@@ -34,15 +35,9 @@ STATICFILES_DIRS = [
 SECRETS_DIR = os.path.join(ROOT_DIR, '.secrets')
 # ec2-deploy/.secrets/base.json
 SECRETS_BASE = os.path.join(SECRETS_DIR, 'base.json')
+SECRETS_LOCAL = os.path.join(SECRETS_DIR, 'local.json')
+SECRETS_DEV = os.path.join(SECRETS_DIR, 'dev.json')
 
-# base.json파일을 읽어온 결과
-f = open(SECRETS_BASE, 'rt')
-base_text = f.read()
-f.close()
-
-# 위 결과 (JSON형식의 문자열)를 파이썬 객체로 변환
-secrets_base = json.loads(base_text)
-# or
 # 한줄로 요약
 secrets_base = json.loads(open(SECRETS_BASE, 'rt').read())
 
@@ -51,16 +46,6 @@ SECRET_KEY = secrets_base['SECRET_KEY']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '.amazonaws.com'
-]
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -73,6 +58,8 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'photos.apps.PhotosConfig',
+
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -105,16 +92,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
@@ -136,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'UTC'
 
@@ -148,3 +125,54 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
+
+RAVEN_CONFIG = {
+    'dsn': secrets_base['RAVEN_DSN'],
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s '
+                      '%(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+}
